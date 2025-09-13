@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 """
 Startup script for the blog backend application.

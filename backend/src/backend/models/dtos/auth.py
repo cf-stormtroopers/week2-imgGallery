@@ -1,34 +1,31 @@
-from typing import Optional
 
-# login
-class LoginRequestDTO:
+from typing import Optional
+from backend.models.base import BaseModel
+
+class LoginRequestDTO(BaseModel):
     username: str
     password: str
 
-# sign up
-class RegisterRequestDTO:
+class RegisterRequestDTO(BaseModel):
     username: str
     email: str
     password: str
     display_name: Optional[str] = None
 
-# create user
-class CreateUserDTO:
+class CreateUserDTO(BaseModel):
     username: str
     email: str
     password: str
     display_name: Optional[str] = None
     role: Optional[str] = "public"
 
-# update user
-class UpdateUserDTO:
+class UpdateUserDTO(BaseModel):
     email: Optional[str] = None
     password: Optional[str] = None
     display_name: Optional[str] = None
     role: Optional[str] = None
 
-# all users
-class UserResponseDTO:
+class UserResponseDTO(BaseModel):
     id: str
     username: str
     email: str

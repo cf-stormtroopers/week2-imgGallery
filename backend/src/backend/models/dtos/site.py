@@ -1,12 +1,13 @@
+
 from typing import Optional
-from backend.src.backend.models.dtos.auth import UserResponseDTO
+from backend.models.base import BaseModel
+from backend.models.dtos.auth import UserResponseDTO
 
-
-class GetSiteInfoDTO:
+class GetSiteInfoDTO(BaseModel):
     user: Optional[UserResponseDTO] = None
     settings: dict = {}
 
-class UpdateSiteSettingsDTO:
+class UpdateSiteSettingsDTO(BaseModel):
     key: str
     value: str
 

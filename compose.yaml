@@ -1,2 +1,119 @@
+
+
+version: '3.8'
 services:
+  # Backend service
+  backend:
+    build: ./backend
+    container_name: gallery_backend
+    ports:
+      - "8011:8011"
+    environment:
+      # Database connection
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=False
+      - HOST=0.0.0.0
+      - PORT=8011
+      - ALLOWED_HOSTS=frontend,localhost,127.0.0.1
+      - SESSION_EXPIRE_HOURS=24
+      # MinIO configuration
+      - MINIO_HOST=minio:9000
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+      # Qdrant configuration
+      - QDRANT_HOST=qdrant:6333
+      - QDRANT_API_KEY=${QDRANT_API_KEY}
+      # AI service
+      - REPLICATE_API_KEY=${REPLICATE_API_KEY}
+    depends_on:
+      - postgres
+      - minio
+      - qdrant
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8011/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend service
+  frontend:
+    build: 
+      context: ./frontend
+      args:
+        - VITE_API_BASE_URL=/api
+    container_name: gallery_frontend
+    ports:
+      - "8012:8012"
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8012/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9010:9000"
+      - "9011:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: ${MINIO_BUCKET:-gallery}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    # To create a default bucket, use an entrypoint script (see docs below)
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    environment:
+      QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY}
+      QDRANT__SERVICE__GRPC_API_KEY: ${QDRANT_GRPC_API_KEY}
+      QDRANT__SERVICE__ENABLE_AUTH: "true"
+      QDRANT__CLUSTER__ENABLED: "false"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5442:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  minio_data:
+  qdrant_data:
+  postgres_data:
+# Minio default bucket setup:
+# To automatically create a bucket at startup, you can use the MINIO_BUCKET env var above and an entrypoint script.
+# See: https://github.com/minio/minio/issues/4766#issuecomment-1509564052
+# Example (not included here):
+#   1. Mount a script to /docker-entrypoint-init.d/ in the minio container.
+#   2. The script uses `mc` (MinIO Client) to create the bucket and set up API keys.
+#   3. This requires a custom Dockerfile or extra container for initialization.
+#   4. For most use cases, you can create the bucket after startup using the MinIO Console or `mc` CLI.
+#
+# Minio API key: Minio does not use API keys in the same way as AWS S3. Use MINIO_ROOT_USER/MINIO_ROOT_PASSWORD for admin access.
+#
+# Qdrant: API keys are set via QDRANT__SERVICE__API_KEY and QDRANT__SERVICE__GRPC_API_KEY.
   

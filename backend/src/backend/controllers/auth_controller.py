@@ -3,7 +3,7 @@ from sqlmodel import Session
 from typing import Optional
 
 from backend.config.database import get_session
-from backend.models import UserLogin, UserCreate, UserRead, SessionRead
+from backend.models import LoginRequestDTO, CreateUserDTO, UserResponseDTO
 from backend.services import UserService, SessionService
 from backend.middleware import get_current_user, require_auth
 from backend.utils import AuthenticationError, ValidationError
@@ -12,8 +12,8 @@ from backend.utils import AuthenticationError, ValidationError
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
 
-@router.post("/register", response_model=UserRead)
-async def register(user_data: UserCreate, session: Session = Depends(get_session)):
+@router.post("/register", response_model=UserResponseDTO)
+async def register(user_data: CreateUserDTO, session: Session = Depends(get_session)):
     """Register a new user."""
     user_service = UserService(session)
     user = user_service.create_user(user_data)
@@ -22,7 +22,7 @@ async def register(user_data: UserCreate, session: Session = Depends(get_session
 
 @router.post("/login")
 async def login(
-    user_credentials: UserLogin,
+    user_credentials: LoginRequestDTO,
     response: Response,
     session: Session = Depends(get_session),
 ):
@@ -55,7 +55,7 @@ async def login(
 
     return {
         "message": "Login successful",
-        "user": UserRead.model_validate(user),
+        "user": UserResponseDTO.model_validate(user),
         "session_token": user_session.session_token,
     }
 

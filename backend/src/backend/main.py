@@ -6,18 +6,13 @@ import logging
 from backend.config import settings
 from backend.config.database import create_db_and_tables
 from backend.controllers import (
-    auth_router, 
-    user_router, 
-    category_router, 
-    tag_router, 
-    comment_router, 
-    like_router,
-    blog_router,
-    theme_router,
-    uploader_router,
-    site_router
+    auth_router,
+    user_router,
+    albums_router,
+    images_router,
+    site_router,
+    collections_router,
 )
-from backend.controllers.role_controller import router as role_router
 
 
 # Configure logging
@@ -30,63 +25,51 @@ logging.getLogger("sqlalchemy.pool").setLevel(logging.WARNING)
 
 def create_app() -> FastAPI:
     """Create and configure FastAPI application."""
-    
+
     app = FastAPI(
         title="Blog Backend API",
         description="A scalable blog backend built with FastAPI and SQLModel",
         version="1.0.0",
-        debug=settings.debug
+        debug=settings.debug,
     )
-    
+
     # CORS middleware
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[
-            "https://chyrp.cf1.ranjithrd.in",
-            "http://chyrp.cf1.ranjithrd.in",
-            "http://localhost:3000",
-        ],
+        allow_origins=settings.allowed_hosts,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    
+
+    print("Allowed hosts:", settings.allowed_hosts)
+
     # Include routers
     app.include_router(auth_router)
     app.include_router(user_router)
-    app.include_router(blog_router)
-    app.include_router(category_router)
-    app.include_router(tag_router)
-    app.include_router(comment_router)
-    app.include_router(like_router)
-    app.include_router(theme_router)
-    app.include_router(uploader_router)
     app.include_router(site_router)
-    app.include_router(role_router)
-    
+    app.include_router(albums_router)
+    app.include_router(images_router)
+    app.include_router(collections_router)
+
     # Global exception handler
     @app.exception_handler(Exception)
     async def global_exception_handler(request: Request, exc: Exception):
         logger.error(f"Global exception handler caught: {exc}")
         return JSONResponse(
-            status_code=500,
-            content={"detail": "Internal server error"}
+            status_code=500, content={"detail": "Internal server error"}
         )
-    
+
     # Health check endpoint
     @app.get("/health")
     async def health_check():
         return {"status": "healthy", "version": "1.0.0"}
-    
+
     # Root endpoint
     @app.get("/")
     async def root():
-        return {
-            "message": "Blog Backend API",
-            "version": "1.0.0",
-            "docs": "/docs"
-        }
-    
+        return {"message": "Blog Backend API", "version": "1.0.0", "docs": "/docs"}
+
     return app
 
 
@@ -100,40 +83,51 @@ async def startup_event():
     logger.info("Starting up...")
     create_db_and_tables()
     logger.info("Database tables created/verified")
-    
-    # Initialize extensions
-    from backend.config.database import create_extensions
-    create_extensions()
-    logger.info("Extensions initialized")
-    
-    # Initialize default settings
-    from backend.config.database import create_default_settings
-    create_default_settings()
-    logger.info("Default settings initialized")
-    
+
+    # Initialize db
+    from backend.config.initial_data import create_initial_data
+
+    create_initial_data()
+
+    # Initialize minio
+    from backend.config.minio import create_minio_client
+
+    create_minio_client()
+    logger.info("MinIO client initialized and bucket verified/created")
+
+    # Initialize qdrant
+    from backend.config.qdrant import create_qdrant_client
+
+    create_qdrant_client()
+    logger.info("Qdrant client initialized")
+
+    # Initialize replicate client
+    from backend.config.replicate import create_replicate_client
+    create_replicate_client()
+    logger.info("Replicate client initialized")
+
     # Initialize permissions and roles
-    from backend.config.database import get_session
-    from backend.services.permission_service import PermissionService
-    
+    # from backend.config.database import get_session
+
     # Get a database session
-    session_gen = get_session()
-    session = next(session_gen)
-    
-    try:
-        permission_service = PermissionService(session)
-        permission_service.ensure_initial_data()
-        logger.info("Initial permissions and roles ensured")
-    finally:
-        session.close()
-    
+    # session_gen = get_session()
+    # session = next(session_gen)
+
+    # try:
+    #     permission_service = PermissionService(session)
+    #     permission_service.ensure_initial_data()
+    #     logger.info("Initial permissions and roles ensured")
+    # finally:
+    #     session.close()
+
     # Create sample data
-    from backend.config.database import create_sample_data
-    try:
-        create_sample_data()
-        logger.info("Sample data created")
-    except Exception as e:
-        logger.warning(f"Sample data creation failed: {e}")
-        # Don't fail startup if sample data creation fails
+    # from backend.config.database import create_sample_data
+    # try:
+    #     create_sample_data()
+    #     logger.info("Sample data created")
+    # except Exception as e:
+    #     logger.warning(f"Sample data creation failed: {e}")
+    #     # Don't fail startup if sample data creation fails
 
 
 @app.on_event("shutdown")
