@@ -28,9 +28,9 @@ services:
       # AI service
       - REPLICATE_API_KEY=${REPLICATE_API_KEY}
     depends_on:
-      - postgres
-      - minio
-      - qdrant
+      - cf2_postgres
+      - cf2_minio
+      - cf2_qdrant
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8011/health"]
       interval: 30s
@@ -47,7 +47,7 @@ services:
     ports:
       - "8012:8012"
     depends_on:
-      - backend
+      - cf2_backend
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8012/"]
       interval: 30s
