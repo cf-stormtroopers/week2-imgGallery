@@ -1,16 +1,14 @@
-
-
 version: '3.8'
 services:
   # Backend service
   cf2_backend:
     build: ./backend
-    container_name: gallery_backend
+    container_name: cf2_backend
     ports:
       - "8011:8011"
     environment:
       # Database connection
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@cf2_postgres:5432/${POSTGRES_DB}
       - SECRET_KEY=${SECRET_KEY}
       - DEBUG=False
       - HOST=0.0.0.0
@@ -18,12 +16,12 @@ services:
       - ALLOWED_HOSTS=frontend,localhost,127.0.0.1,${ALLOWED_HOSTS}
       - SESSION_EXPIRE_HOURS=24
       # MinIO configuration
-      - MINIO_HOST=minio:9000
+      - MINIO_HOST=cf2_minio:9000
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
       - MINIO_BUCKET=${MINIO_BUCKET}
       # Qdrant configuration
-      - QDRANT_HOST=qdrant:6333
+      - QDRANT_HOST=cf2_qdrant:6333
       - QDRANT_API_KEY=${QDRANT_API_KEY}
       # AI service
       - REPLICATE_API_KEY=${REPLICATE_API_KEY}
@@ -43,7 +41,7 @@ services:
       context: ./frontend
       args:
         - VITE_API_BASE_URL=${FRONTEND_API_BASE_URL}
-    container_name: gallery_frontend
+    container_name: cf2_frontend
     ports:
       - "8012:8012"
     depends_on:
@@ -53,9 +51,10 @@ services:
       interval: 30s
       timeout: 3s
       retries: 3
+
   cf2_minio:
     image: minio/minio:latest
-    container_name: minio
+    container_name: cf2_minio
     ports:
       - "9010:9000"
       - "9011:9001"
@@ -75,7 +74,7 @@ services:
 
   cf2_qdrant:
     image: qdrant/qdrant:latest
-    container_name: qdrant
+    container_name: cf2_qdrant
     ports:
       - "6333:6333"
       - "6334:6334"
@@ -89,7 +88,7 @@ services:
 
   cf2_postgres:
     image: postgres:15
-    container_name: postgres
+    container_name: cf2_postgres
     restart: always
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -116,4 +115,4 @@ volumes:
 # Minio API key: Minio does not use API keys in the same way as AWS S3. Use MINIO_ROOT_USER/MINIO_ROOT_PASSWORD for admin access.
 #
 # Qdrant: API keys are set via QDRANT__SERVICE__API_KEY and QDRANT__SERVICE__GRPC_API_KEY.
-  
+// ...existing code...

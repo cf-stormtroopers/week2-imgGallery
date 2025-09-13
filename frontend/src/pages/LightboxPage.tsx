@@ -108,7 +108,7 @@ export default function LightboxPage() {
                                 <span className="text-lg">{isLiked ? "❤️" : "🤍"}</span>
                                 <span>{isToggling ? "..." : likeCount}</span>
                             </button>
-                            {auth.accountInformation?.role === "editor" && <button
+                            {(auth.accountInformation?.role === "editor" || auth.accountInformation?.role === "admin") && <button
                                 onClick={handleDelete}
                                 disabled={isDeleting}
                                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 transition-colors"

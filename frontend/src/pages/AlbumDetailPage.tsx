@@ -74,7 +74,7 @@ export default function AlbumDetailPage() {
               <div className="font-bold">Part of {album?.collection_name}</div>
               <div className="">{album?.description}</div>
             </div>
-            {auth.accountInformation?.role === "editor" && <button className="underline text-sky-800" onClick={() => setShouldEditAlbum(e => !e)}>Edit</button>}
+            {(auth.accountInformation?.role === "editor" || auth.accountInformation?.role === "admin") && <button className="underline text-sky-800" onClick={() => setShouldEditAlbum(e => !e)}>Edit</button>}
           </div>
           <Photos images={images} />
         </main>

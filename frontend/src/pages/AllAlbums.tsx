@@ -30,7 +30,7 @@ export default function AllAlbums() {
         <aside className="w-1/4 p-6 border-r border-gray-200">
           <h2 className="text-lg font-bold mb-4 ">Collections</h2>
           <div className="mb-4">
-            {auth.accountInformation?.role === "editor" && <button
+            {(auth.accountInformation?.role === "editor" || auth.accountInformation?.role === "admin") && <button
               className="bg-sky-800 hover:bg-sky-900 text-white px-4 py-2 rounded font-bold mb-2"
               onClick={() => setShowCollectionForm(true)}
             >
@@ -60,7 +60,7 @@ export default function AllAlbums() {
         <main className="flex-1 p-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold ">All Albums</h1>
-            {auth.accountInformation?.role === "editor" && <button
+            {(auth.accountInformation?.role === "editor" || auth.accountInformation?.role === "admin") && <button
               className="bg-sky-800 hover:bg-sky-900 text-white px-4 py-2 rounded font-bold"
               onClick={() => setShowAlbumForm(true)}
             >
