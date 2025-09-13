@@ -17,7 +17,7 @@ export default function HomePage() {
   return (
     <Layout query={query} setQuery={setQuery}>
       <div className="flex flex-1 h-full flex-row items-stretch">
-        <aside className="w-1/4 p-6 border-r border-gray-200 flex flex-col justify-between">
+        <aside className="h-full w-1/4 p-6 border-r border-gray-200 flex flex-col justify-between">
           <div className="flex flex-1 overflow-y-auto p-2">
             <Albums albums={albums} />
           </div>

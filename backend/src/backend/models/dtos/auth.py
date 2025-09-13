@@ -8,19 +8,16 @@ class LoginRequestDTO(BaseModel):
 
 class RegisterRequestDTO(BaseModel):
     username: str
-    email: str
     password: str
     display_name: Optional[str] = None
 
 class CreateUserDTO(BaseModel):
     username: str
-    email: str
     password: str
     display_name: Optional[str] = None
     role: Optional[str] = "public"
 
 class UpdateUserDTO(BaseModel):
-    email: Optional[str] = None
     password: Optional[str] = None
     display_name: Optional[str] = None
     role: Optional[str] = None
@@ -28,7 +25,6 @@ class UpdateUserDTO(BaseModel):
 class UserResponseDTO(BaseModel):
     id: str
     username: str
-    email: str
     display_name: Optional[str] = None
     role: str
 

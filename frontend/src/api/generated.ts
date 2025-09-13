@@ -103,7 +103,6 @@ export interface CreateUserDTO {
   created_at?: string;
   updated_at?: string;
   username: string;
-  email: string;
   password: string;
   display_name?: CreateUserDTODisplayName;
   role?: CreateUserDTORole;
@@ -196,8 +195,6 @@ export interface UpdateSiteSettingsDTO {
   value: string;
 }
 
-export type UpdateUserDTOEmail = string | null;
-
 export type UpdateUserDTOPassword = string | null;
 
 export type UpdateUserDTODisplayName = string | null;
@@ -207,7 +204,6 @@ export type UpdateUserDTORole = string | null;
 export interface UpdateUserDTO {
   created_at?: string;
   updated_at?: string;
-  email?: UpdateUserDTOEmail;
   password?: UpdateUserDTOPassword;
   display_name?: UpdateUserDTODisplayName;
   role?: UpdateUserDTORole;
@@ -220,7 +216,6 @@ export interface UserResponseDTO {
   updated_at?: string;
   id: string;
   username: string;
-  email: string;
   display_name?: UserResponseDTODisplayName;
   role: string;
 }

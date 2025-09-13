@@ -1,3 +1,4 @@
+import uuid
 from fastapi import APIRouter, Depends, Response, Request
 from sqlmodel import Session
 from typing import Optional
@@ -55,7 +56,8 @@ async def login(
 
     return {
         "message": "Login successful",
-        "user": UserResponseDTO.model_validate(user),
+        "ok": "true",
+        # "user": UserResponseDTO.model_validate(user, from_attributes=True),
         "session_token": user_session.session_token,
     }
 

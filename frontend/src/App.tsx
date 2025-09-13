@@ -7,20 +7,24 @@ import LightboxPage from "./pages/LightboxPage";
 import { useGetSiteInfoSiteInfoGet } from "./api/generated";
 import { useEffect } from "react";
 import { convertSettingsDictToSettings, useAuthStore } from "./state/auth";
+import ProfilePage from "./pages/Profile";
+import LoginPage from "./pages/Login";
 
 export default function App() {
   const authStore = useAuthStore()
-  const { data: siteInfo } = useGetSiteInfoSiteInfoGet()
+  const { data: siteInfo, mutate } = useGetSiteInfoSiteInfoGet()
 
   useEffect(() => {
     if (siteInfo) {
+      console.log("SEttings...")
+      authStore.setMutate(() => mutate())
       authStore.setAccountInformation(siteInfo.user || null)
       authStore.setSettings(
         convertSettingsDictToSettings(
-          siteInfo.settings && typeof siteInfo.settings === "object"
+          siteInfo.settings
             ? Object.fromEntries(
-                Object.entries(siteInfo.settings).map(([k, v]) => [k, String(v)])
-              )
+              Object.entries(siteInfo.settings).map(([k, v]) => [k, String(v)])
+            )
             : {}
         )
       )
@@ -30,14 +34,25 @@ export default function App() {
   console.log("App!")
 
   return <main>
-    <Switch>
+    {authStore.accountInformation ? <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/add" component={AddPhotoToGallery} />
       <Route path="/albums" component={AllAlbums} />
       <Route path="/albums/:id" component={AlbumDetailPage} />
       <Route path="/albums/new" component={AlbumDetailPage} />
       <Route path="/image/:id" component={LightboxPage} />
+      <Route path="/profile" component={ProfilePage} />
       <Route path="*"><Redirect to="/" /></Route>
-    </Switch>
+    </Switch> : <Switch>
+      <Route path="/" component={HomePage} />
+      {/* <Route path="/add" component={AddPhotoToGallery} /> */}
+      <Route path="/albums" component={AllAlbums} />
+      <Route path="/albums/:id" component={AlbumDetailPage} />
+      {/* <Route path="/albums/new" component={AlbumDetailPage} /> */}
+      <Route path="/image/:id" component={LightboxPage} />
+      <Route path="/profile"><Redirect to="/login" /></Route>
+      <Route path="/login" component={LoginPage} />
+      <Route path="*"><Redirect to="/" /></Route>
+    </Switch>}
   </main>
 }

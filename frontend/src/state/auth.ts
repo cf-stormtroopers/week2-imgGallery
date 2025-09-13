@@ -8,8 +8,9 @@ export interface Settings {
 }
 
 export function convertSettingsDictToSettings(settings: Record<string, string>): Settings {
+    console.log("Converting settings:", settings, settings.site_name)
     return {
-        site_title: settings["site_title"] || "",
+        site_title: settings["site_name"] || "",
         allow_registration: settings["allow_registration"] === "true"
     }
 }

@@ -37,12 +37,12 @@ async def add_user(
 
 @router.get("/{user_id}", response_model=UserResponseDTO)
 async def get_user(
-    user_id: uuid.UUID,
+    user_id: str,
     session: Session = Depends(get_session),
     current_user = Depends(require_auth)
 ):
     user_service = UserService(session)
-    user = user_service.get_user_by_id(user_id)
+    user = user_service.get_user_by_id(uuid.UUID(user_id))
     if not user:
         raise NotFoundError("User not found")
     return user
@@ -50,23 +50,23 @@ async def get_user(
 
 @router.put("/{user_id}", response_model=UserResponseDTO)
 async def update_user(
-    user_id: uuid.UUID,
+    user_id: str,
     user_data: UpdateUserDTO,
     session: Session = Depends(get_session),
     current_user = Depends(require_auth)
 ):
     user_service = UserService(session)
-    user = user_service.update_user(user_id, user_data)
+    user = user_service.update_user(uuid.UUID(user_id), user_data)
     return user
 
 
 @router.delete("/{user_id}")
 async def delete_user(
-    user_id: uuid.UUID,
+    user_id: str,
     session: Session = Depends(get_session),
     current_user = Depends(require_auth)
 ):
     """Delete user (only own profile or admin)."""
     user_service = UserService(session)
-    user_service.delete_user(user_id)
+    user_service.delete_user(uuid.UUID(user_id))
     return {"message": "User deleted"}

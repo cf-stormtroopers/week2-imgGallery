@@ -15,7 +15,7 @@ services:
       - DEBUG=False
       - HOST=0.0.0.0
       - PORT=8011
-      - ALLOWED_HOSTS=frontend,localhost,127.0.0.1
+      - ALLOWED_HOSTS=frontend,localhost,127.0.0.1,${ALLOWED_HOSTS}
       - SESSION_EXPIRE_HOURS=24
       # MinIO configuration
       - MINIO_HOST=minio:9000
@@ -42,7 +42,7 @@ services:
     build: 
       context: ./frontend
       args:
-        - VITE_API_BASE_URL=/api
+        - VITE_API_BASE_URL=${FRONTEND_API_BASE_URL}
     container_name: gallery_frontend
     ports:
       - "8012:8012"

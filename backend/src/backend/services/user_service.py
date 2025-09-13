@@ -18,7 +18,6 @@ class UserService:
         return UserResponseDTO(
             id=str(user.id),
             username=user.username,
-            email=user.email,
             display_name=user.display_name,
             role=user.role
         )
@@ -29,15 +28,9 @@ class UserService:
         if existing_user:
             raise ConflictError("Username already exists")
 
-        statement = select(User).where(User.email == user_data.email)
-        existing_user = self.session.exec(statement).first()
-        if existing_user:
-            raise ConflictError("Email already exists")
-
         hashed_password = hash_password(user_data.password)
         user = User(
             username=user_data.username,
-            email=user_data.email,
             password_hash=hashed_password,
             display_name=user_data.display_name,
             role=user_data.role or "public"
@@ -58,11 +51,6 @@ class UserService:
     def get_user_by_username(self, username: str) -> Optional[User]:
         """Get user by username."""
         statement = select(User).where(User.username == username)
-        return self.session.exec(statement).first()
-
-    def get_user_by_email(self, email: str) -> Optional[User]:
-        """Get user by email."""
-        statement = select(User).where(User.email == email)
         return self.session.exec(statement).first()
 
     def authenticate_user(self, username: str, password: str) -> Optional[User]:

@@ -4,8 +4,10 @@ import { useGetImageImagesImageIdGet, useDeleteImageImagesImageIdDelete, useTogg
 import { getImageUrlFromDbUrl } from "../api/axios";
 import Comments from "../components/Comments";
 import { useState, useEffect } from "react";
+import { useAuthStore } from "../state/auth";
 
 export default function LightboxPage() {
+    const auth = useAuthStore();
     const { id } = useParams<{ id: string }>();
     const [, setLocation] = useLocation();
     const [likeCount, setLikeCount] = useState(0);
@@ -96,7 +98,7 @@ export default function LightboxPage() {
                         <div className="flex gap-3 ml-4">
                             <button
                                 onClick={handleLike}
-                                disabled={isToggling}
+                                disabled={isToggling || !auth.accountInformation}
                                 className={`flex items-center gap-2 px-4 py-2 rounded transition-colors ${
                                     isLiked 
                                         ? "bg-red-100 text-red-800 hover:bg-red-200" 
@@ -106,13 +108,13 @@ export default function LightboxPage() {
                                 <span className="text-lg">{isLiked ? "❤️" : "🤍"}</span>
                                 <span>{isToggling ? "..." : likeCount}</span>
                             </button>
-                            <button
+                            {auth.accountInformation?.role === "editor" && <button
                                 onClick={handleDelete}
                                 disabled={isDeleting}
                                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 transition-colors"
                             >
                                 {isDeleting ? "Deleting..." : "Delete"}
-                            </button>
+                            </button>}
                         </div>
                     </div>
                 </div>

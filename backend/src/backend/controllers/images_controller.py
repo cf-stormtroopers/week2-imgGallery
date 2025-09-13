@@ -14,6 +14,7 @@ from typing import List
 
 from backend.services.album_service import AlbumService
 from backend.models.models import Comment, Like, User
+from backend.middleware.auth import get_current_user_optional
 
 router = APIRouter(prefix="/images", tags=["images"])
 
@@ -52,9 +53,9 @@ class LikeToggleResponseDTO(BaseModel):
 
 
 @router.get("/home", response_model=HomeResponseDTO)
-def get_home_images(session: Session = Depends(get_session)):
+def get_home_images(session: Session = Depends(get_session), user: Optional[User] = Depends(get_current_user_optional)):
     service = ImageService(session)
-    data = service.get_home_images()
+    data = service.get_home_images(user=user)
     albums = AlbumService(session).list_albums()
     return HomeResponseDTO(images=data["images"], albums=albums)
 
@@ -64,6 +65,7 @@ def get_image(
     image_id: str,
     session: Session = Depends(get_session),
     user_id: Optional[str] = None,
+    user: Optional[User] = Depends(get_current_user_optional)
 ):
     service = ImageService(session)
     if user_id is not None:
@@ -73,6 +75,10 @@ def get_image(
     else:
         user_id_val = None
     image = service.get_image(image_id, user_id_val)
+
+    if not user and image and image.privacy == "private":
+        return {"detail": "Image not found"}
+
     if not image:
         return {"detail": "Image not found"}
     return image
@@ -126,9 +132,10 @@ def delete_image(image_id: str, session: Session = Depends(get_session)):
 def search_images(
     query: str,
     session: Session = Depends(get_session),
+    user: Optional[User] = Depends(get_current_user_optional)
 ):
     service = ImageService(session)
-    images = service.combined_search_images(query)
+    images = service.combined_search_images(query, user=user)
     return images
 
 

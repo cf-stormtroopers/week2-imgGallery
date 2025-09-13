@@ -7,8 +7,11 @@ import CollectionForm from "../components/CollectionForm";
 import { createAlbumAlbumsPost, createCollectionCollectionsPost, useListAlbumsAlbumsGet, useListCollectionsCollectionsGet } from "../api/generated";
 import Layout from "../components/Layout";
 import { mutate } from "swr";
+import { useAuthStore } from "../state/auth";
 
 export default function AllAlbums() {
+  const auth = useAuthStore();
+
   // Fetch albums and collections
   const albumsData = useListAlbumsAlbumsGet();
   const collectionsData = useListCollectionsCollectionsGet();
@@ -27,12 +30,12 @@ export default function AllAlbums() {
         <aside className="w-1/4 p-6 border-r border-gray-200">
           <h2 className="text-lg font-bold mb-4 ">Collections</h2>
           <div className="mb-4">
-            <button
+            {auth.accountInformation?.role === "editor" && <button
               className="bg-sky-800 hover:bg-sky-900 text-white px-4 py-2 rounded font-bold mb-2"
               onClick={() => setShowCollectionForm(true)}
             >
               + New Collection
-            </button>
+            </button>}
             <ul className="mt-2 space-y-2">
               {collections.map((c: any) => (
                 <li key={c.id} className="text-gray-800 font-medium">
@@ -57,12 +60,12 @@ export default function AllAlbums() {
         <main className="flex-1 p-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold ">All Albums</h1>
-            <button
+            {auth.accountInformation?.role === "editor" && <button
               className="bg-sky-800 hover:bg-sky-900 text-white px-4 py-2 rounded font-bold"
               onClick={() => setShowAlbumForm(true)}
             >
               + New Album
-            </button>
+            </button>}
           </div>
           <Albums albums={albums} />
           {showAlbumForm && (

@@ -23,13 +23,21 @@ class ImageService:
     def __init__(self, session: Session):
         self.session = session
 
-    def get_home_images(self) -> dict:
+    def get_home_images(self, user) -> dict:
         images = self.session.exec(select(Image).order_by(desc(Image.timestamp))).all()
         albums = self.session.exec(
             select(Album).order_by(desc(Album.updated_at)).limit(5)
         ).all()
+
+        filtered_images = []
+        for img in images:
+            if img.privacy == "public":
+                filtered_images.append(img)
+            elif user:
+                filtered_images.append(img)
+
         return {
-            "images": [ImageResponseDTO.model_validate(img.__dict__, from_attributes=True) for img in images],
+            "images": [ImageResponseDTO.model_validate(img.__dict__, from_attributes=True) for img in filtered_images],
             "albums": [AlbumResponseDTO.model_validate(album.__dict__, from_attributes=True) for album in albums],
         }
 
@@ -226,7 +234,7 @@ class ImageService:
         return ordered_images
 
     def combined_search_images(
-        self, query: str, top_k: int = 20
+        self, query: str, top_k: int = 20, user = None
     ) -> list:
         """
         Combines text-based and vector-based search results.
@@ -260,12 +268,19 @@ class ImageService:
         
         # Combine: text matches first (highest relevance), then vector similarity
         final_results = text_results + vector_only_results
+
+        filtered_final_results = []
+        for img in final_results:
+            if img.privacy == "public":
+                filtered_final_results.append(img)
+            elif user:
+                filtered_final_results.append(img)
         
         print(f"Combined search found {len(final_results)} results:")
         print(f"  - {len(text_results)} exact text matches")
         print(f"  - {len(vector_only_results)} vector similarity matches")
 
-        return final_results
+        return filtered_final_results
 
     def delete_image(self, image_id: str) -> bool:
         image = self.session.get(Image, uuid.UUID(image_id))

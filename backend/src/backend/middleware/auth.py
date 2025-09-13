@@ -30,6 +30,8 @@ async def get_current_user(
     
     if not token:
         return None
+
+    print("Token:", token)
     
     # Find session
     statement = select(UserSession).where(

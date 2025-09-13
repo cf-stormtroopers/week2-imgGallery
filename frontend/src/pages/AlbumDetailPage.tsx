@@ -6,8 +6,10 @@ import { useUpdateAlbumAlbumsAlbumIdPut } from "../api/generated";
 import { useState } from "react";
 import Photos from "../components/Photos";
 import Layout from "../components/Layout";
+import { useAuthStore } from "../state/auth";
 
 export default function AlbumDetailPage() {
+  const auth = useAuthStore();
   const [, params] = useRoute("/albums/:id");
   const albumId = params?.id || "";
   const [shouldEditAlbum, setShouldEditAlbum] = useState(false);
@@ -72,7 +74,7 @@ export default function AlbumDetailPage() {
               <div className="font-bold">Part of {album?.collection_name}</div>
               <div className="">{album?.description}</div>
             </div>
-            <button className="underline text-sky-800" onClick={() => setShouldEditAlbum(e => !e)}>Edit</button>
+            {auth.accountInformation?.role === "editor" && <button className="underline text-sky-800" onClick={() => setShouldEditAlbum(e => !e)}>Edit</button>}
           </div>
           <Photos images={images} />
         </main>
