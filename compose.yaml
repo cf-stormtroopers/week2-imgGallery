@@ -3,7 +3,7 @@
 version: '3.8'
 services:
   # Backend service
-  backend:
+  cf2_backend:
     build: ./backend
     container_name: gallery_backend
     ports:
@@ -38,7 +38,7 @@ services:
       retries: 3
 
   # Frontend service
-  frontend:
+  cf2_frontend:
     build: 
       context: ./frontend
       args:
@@ -53,7 +53,7 @@ services:
       interval: 30s
       timeout: 3s
       retries: 3
-  minio:
+  cf2_minio:
     image: minio/minio:latest
     container_name: minio
     ports:
@@ -73,7 +73,7 @@ services:
       retries: 3
     # To create a default bucket, use an entrypoint script (see docs below)
 
-  qdrant:
+  cf2_qdrant:
     image: qdrant/qdrant:latest
     container_name: qdrant
     ports:
@@ -87,7 +87,7 @@ services:
     volumes:
       - qdrant_data:/qdrant/storage
 
-  postgres:
+  cf2_postgres:
     image: postgres:15
     container_name: postgres
     restart: always
