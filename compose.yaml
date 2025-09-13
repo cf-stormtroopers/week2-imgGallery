@@ -115,4 +115,3 @@ volumes:
 # Minio API key: Minio does not use API keys in the same way as AWS S3. Use MINIO_ROOT_USER/MINIO_ROOT_PASSWORD for admin access.
 #
 # Qdrant: API keys are set via QDRANT__SERVICE__API_KEY and QDRANT__SERVICE__GRPC_API_KEY.
-// ...existing code...
